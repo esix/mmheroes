@@ -15,7 +15,7 @@ function get_user_name() {
 function set_user_name(name) {
   local_user_name = name;
   if (window.localStorage) {
-    window.localStorage.nick = name;
+    window.localStorage.setItem('nick', name);
   }
 }
 
@@ -65,7 +65,7 @@ let hero = {
   is_working_in_terkom: 0,
   got_stipend: 0,
   has_ticket: 0,
-  knows_djug: 0,
+        knows_djug: 0,
 
   brain: 0,
   stamina: 0,
@@ -273,17 +273,6 @@ function get_stack() {
     return e.stack;
   }
 }
-
-function get_stack_before(func) {
-  let s = get_stack().split('\n');
-  //console.dir(s);
-  for (let i = s.length - 1; i >= 0; --i) {
-    if (s[i].indexOf(func) !== -1) {
-      return s[i + 1];
-    }
-  }
-}
-
 
 let first_run = true;
 
@@ -2885,6 +2874,7 @@ let aGeroiZarabotal = '    ГЕРОЙ            ЗАРАБОТАЛ';
 let aRub__1 = ' руб.';
 
 
+
 async function show_top_gamers() {
   ClrScr();
   TextColor(0x0F);
@@ -2943,54 +2933,42 @@ async function sub_171C4() {
 } // end function 171C4
 
 
-let aUviPomiUjeZakr = 'Увы, ПОМИ уже закрыто, поэтому придется ехать домой...';
-let aTiVPitereNaBal = 'Ты в Питере, на Балтийском вокзале.';
-let aKudaNapravlqem = 'Куда направляемся?';
-let aDomoiVPunk = 'Домой, в ПУНК!';
-let aXocuVPomi = 'Хочу в ПОМИ!';
-let aXorosoBiletEst = 'Хорошо, билет есть...';
-let aTebqZalovili_2 = 'Тебя заловили контролеры!';
-let aVisadiliVKra_2 = 'Высадили в Красных зорях, гады!';
-let aKontroleriJi_3 = 'Контролеры жизни лишили.';
-let aUfDoexal___ = 'Уф, доехал...';
-
-
 async function sub_173B6() {
   let var_1;
 
   ClrScr();
   if (time_of_day > 20) {
     TextColor(0x0E);
-    writeln(aUviPomiUjeZakr);
+    writeln('Увы, ПОМИ уже закрыто, поэтому придется ехать домой...');
     var_1 = 4;
   } else {
     show_header_stats();
     current_subject = -1;
     GotoXY(1, 0x0C);
     TextColor(0x0B);
-    writeln(aTiVPitereNaBal);
-    writeln(aKudaNapravlqem);
+    writeln('Ты в Питере, на Балтийском вокзале.');
+    writeln('Куда направляемся?');
     show_short_today_timesheet(0x0C);
     dialog_start();
-    dialog_case(aDomoiVPunk, -1);
-    dialog_case(aXocuVPomi, -2);
+    dialog_case('Домой, в ПУНК!', -1);
+    dialog_case('Хочу в ПОМИ!', -2);
     var_1 = await dialog_run(1, 0x0F) === -1 ? 1 : 2;
   }
 
   if (jz(var_1, 1)) {
     GotoXY(1, 0x14);
     if (hero.has_ticket) {
-      writeln(aXorosoBiletEst);
+      writeln('Хорошо, билет есть...');
     } else if (hero.charizma < Random(0x0A)) {
-      writeln(aTebqZalovili_2);
-      writeln(aVisadiliVKra_2);
-      decrease_health(0x0A, aKontroleriJi_3);
+      writeln('Тебя заловили контролеры!');
+      writeln('Высадили в Красных зорях, гады!');
+      decrease_health(0x0A, 'Контролеры жизни лишили.');
       await hour_pass();
       current_place = 1;
       await wait_for_key();
       ClrScr();
     } else {
-      writeln(aUfDoexal___);
+      writeln('Уф, доехал...');
     }
     await hour_pass();
   }
@@ -2998,18 +2976,7 @@ async function sub_173B6() {
   current_place = var_1;
 } // end function 173B6
 
-
-let aVsemirnovPrini = 'Всемирнов принимает зачет даже в электричке!';
-let aMucaesSq___ = 'Мучаешься ...';
-let aZamucil = ' замучил';
-let aA = 'а';
-let a_ = '.';
-let aTvoiMuceniqBil = 'Твои мучения были напрасны.';
-let aTebeZacliEse = 'Тебе зачли еще ';
-
-
 async function sub_175A6() {
-  let var_106;
   let var_6;
   let var_4;
   let var_2;
@@ -3017,9 +2984,9 @@ async function sub_175A6() {
   ClrScr();
   show_header_stats();
   GotoXY(1, 0x0E);
-  writeln(aVsemirnovPrini);
+  writeln('Всемирнов принимает зачет даже в электричке!');
   TextColor(0x0D);
-  writeln(aMucaesSq___);
+  writeln('Мучаешься ...');
   TextColor(7);
   writeln();
 
@@ -3057,19 +3024,19 @@ async function sub_175A6() {
   hero.health += var_4;
   if (hero.health <= 0) {
     is_end = 1;
-    death_cause = subjects[current_subject].professor.name + aZamucil;
+    death_cause = subjects[current_subject].professor.name + ' замучил';
     if (!jnz(subjects[current_subject].professor.sex, 0)) {
-      death_cause += aA;
+      death_cause += 'а';
     }
-    death_cause += a_;
+    death_cause += '.';
   } else {
 
     GotoXY(1, 0x15);
 
     if (var_6 === 0) {
-      colored_output(0x0C, aTvoiMuceniqBil);
+      colored_output(0x0C, 'Твои мучения были напрасны.');
     } else {
-      colored_output(0x0A, aTebeZacliEse);
+      colored_output(0x0A, 'Тебе зачли еще ');
       colored_output_white(var_6);
       TextColor(0x0A);
       zadanie_in_case(var_6);
@@ -3086,20 +3053,10 @@ async function sub_175A6() {
 } // end function 175A6
 
 
-let aM_a_Vsemirnov = 'М.А. Всемирнов :';
-let aNetSegodnqQBol = '"Нет, сегодня я больше никому ничего не засчитаю..."';
-let aUslisavAtuFraz = 'Услышав эту фразу, ты осознаешь беспочвенность своих мечтаний';
-let aOSdaceZacetaPo = 'о сдаче зачета по алгебре в электричке.';
-let aEstNadejdaCtoV = 'Есть надежда, что в электричке удастся что-то еще решить.';
-let aPravdaZacetnoi = 'Правда, зачетной ведомости с собой туда не взять...';
-let aDenegUTebqNe_2 = 'Денег у тебя нет, пришлось ехать зайцем...';
-let aTebqZalovili_3 = 'Тебя заловили контролеры!';
 let aVisadiliVKra_3 = 'Высадили в Красных зорях, гады!';
 let aKontroleriJi_4 = 'Контролеры жизни лишили.';
 let aExatZaicem_2 = 'Ехать зайцем';
 let aCestnoZaplat_2 = 'Честно заплатить 10 руб. за билет в оба конца';
-let aKontrolleriKon = 'Контроллеры, контроллеры, контроллеры...';
-let aISoVsemirnovim = 'И со Всемирновым ты ничего не успел...';
 
 
 async function sub_17AA2() {
@@ -3109,30 +3066,28 @@ async function sub_17AA2() {
 
   if (!jle(time_of_day, 0x14)) {
     TextColor(7);
-    write(aM_a_Vsemirnov);
+    write('М.А. Всемирнов :');
     TextColor(0x0F);
-    writeln(aNetSegodnqQBol);
+    writeln('"Нет, сегодня я больше никому ничего не засчитаю..."');
     TextColor(0x0E);
-    writeln(aUslisavAtuFraz);
-    writeln(aOSdaceZacetaPo);
+    writeln('Услышав эту фразу, ты осознаешь беспочвенность своих мечтаний');
+    writeln('о сдаче зачета по алгебре в электричке.');
     await wait_for_key();
     current_subject = -1;
     return;
   }
 
   TextColor(7);
-  writeln(aEstNadejdaCtoV);
-  writeln(aPravdaZacetnoi);
+  writeln('Есть надежда, что в электричке удастся что-то еще решить.');
+  writeln('Правда, зачетной ведомости с собой туда не взять...');
 
   if (jl(hero.money, 0x0A)) {
-
     TextColor(0x0C);
-    writeln(aDenegUTebqNe_2);
+    writeln('Денег у тебя нет, пришлось ехать зайцем...');
 
     if (hero.charizma < Random(0x0A)) {
-
       TextColor(0x0D);
-      writeln(aTebqZalovili_3);
+      writeln('Тебя заловили контролеры!');
       writeln(aVisadiliVKra_3);
       decrease_health(0x0A, aKontroleriJi_4);
       current_place = 1;
@@ -3153,9 +3108,9 @@ async function sub_17AA2() {
       if (hero.charizma < Random(0x0A)) {
         GotoXY(1, 0x15);
         TextColor(0x0D);
-        writeln(aTebqZalovili_3);
-        decrease_health(0x0A, aKontrolleriKon);
-        writeln(aISoVsemirnovim);
+        writeln('Тебя заловили контролеры!');
+        decrease_health(0x0A, 'Контроллеры, контроллеры, контроллеры...');
+        writeln('И со Всемирновым ты ничего не успел...');
         await wait_for_key();
         ClrScr();
       }
@@ -4310,9 +4265,7 @@ async function sub_1B986() {
     let ax = await dialog_run(1, 0x0B);
 
     if (ax === -1) {
-
       if (jg(hero.subject[current_subject].knowledge, subjects[current_subject].member0xFA)) {
-
         GotoXY(1, 0x0E);
         TextColor(0x0E);
         write(aOiSpasiboVotVa);
@@ -4332,7 +4285,6 @@ async function sub_1B986() {
         await hour_pass();
 
       } else {
-
         GotoXY(1, 0x0E);
         TextColor(0x0D);
         writeln(aUTebqNicegoNeV);
