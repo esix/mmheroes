@@ -20,8 +20,6 @@ function set_user_name(name) {
 }
 
 
-
-
 /* 0xC8, size 0x44; offsets: [6]
 0		0x0C8	subject_professor_names
 0x11	0x0D9	subject_titles
@@ -260,94 +258,7 @@ function Delay(pause) { /*let start = new Date().getTime(); while (new Date().ge
 }
 
 
-function alyarme(str) {
-  let d = Replay.data;
-  //d.rnds_stack = [];
-  alert(str + '\r\n\r\n' + get_stack() + '\r\n\r\n' + JSON.stringify(d));
-}
-
-function get_stack() {
-  try {
-    throw Error();
-  } catch (e) {
-    return e.stack;
-  }
-}
-
 let first_run = true;
-
-let Replay = {
-  data: {
-    on: 0,
-    rnds: [], rnds_up: [], rnds_stack: [], rnds_i: 0,
-    keys: [], keys_count: 0, keys_i: 0,
-    dialogs: [], dialogs_i: 0,
-    strs: [], strs_i: 0,
-    clrscr_count: 0, clrscr_i: 0,
-    start: false, end: false,
-    wait_for_dialog: false
-  },
-  is_on: function () {
-    return this.data.on;
-  },
-  start: function () {
-    this.data.start = true;
-    this.data.end = false;
-  },
-  stop: function () {
-    this.data.start = false;
-    this.data.end = true;
-  },
-  can_skip_output: function () {
-    return this.data.on && this.data.clrscr_i < this.data.clrscr_count;
-  },
-  next_string: function () {
-    return this.data.strs[this.data.strs_i++];
-  },
-  record_string: function (res) {
-    this.data.strs.push(res);
-  },
-  keys_remains: function () {
-    return this.data.keys_i < this.data.keys_count;
-  },
-  dialogs_remains: function () {
-    return this.data.dialogs_i < this.data.dialogs.length;
-  },
-  strs_remains: function () {
-    return this.data.strs_i < this.data.strs.length;
-  },
-  last: function () {
-    return !this.keys_remains() && !this.dialogs_remains() && !this.strs_remains();
-  },
-  turn_off: function () {
-    this.data.on = 0;
-    this.data.rnds_i = 0;
-    this.data.keys_i = 0;
-    this.data.dialogs_i = 0;
-    this.data.strs_i = 0;
-    this.data.clrscr_i = 0;
-    //console.log('replay now off');
-  },
-  restart: function () {
-    //console.log('Replay.restart');
-    this.data.on = 0;
-    this.data.rnds = [];
-    this.data.rnds_up = [];
-    this.data.rnds_stack = [];
-    this.data.rnds_i = 0;
-    this.data.keys = [];
-    this.data.keys_count = 0;
-    this.data.keys_i = 0;
-    this.data.dialogs = [];
-    this.data.dialogs_i = 0;
-    this.data.strs = [];
-    this.data.strs_i = 0;
-    this.data.clrscr_count = this.data.clrscr_i = 0;
-    this.data.wait_for_dialog = false;
-  }
-};
-
-
 
 function ClrScr() {
   PositionC = 0;
@@ -378,12 +289,6 @@ function _update_screen() {
 }
 
 function write(str) {
-  if (Replay.can_skip_output() || str === undefined) {
-    return;
-  }
-  if (PositionR >= 25) {
-    alyarme('write at pos ' + PositionR + ',' + PositionC);
-  }
   str = '' + str;
   for (let i = 0; i < str.length; ++i) {
     Screen[PositionR][PositionC] = str.charAt(i);
@@ -396,33 +301,17 @@ function write(str) {
 
 function Random(up) {
   let res = Math.floor(Math.random() * up);
-  if (up && res >= up || !up && res > 0) {
-    alyarme('Random(' + up + ') = ' + res);
-  }
   return res;
 }
 
 
 function readln() {
   debugger;
-  if (Replay.is_on()) {
-    let res = false;
-    if (Replay.strs_remains()) {
-      let res = Replay.next_string();
-    }
-    if (Replay.last()) {
-      Replay.turn_off();
-    }
-    if (res !== false) {
-      return res;
-    }
-  }
   _update_screen();
   let res = prompt('Enter string:', get_user_name());
   if (res === null) {
     res = '';
   }
-  Replay.record_string(res);
   return res;
 }
 
@@ -461,7 +350,6 @@ async function dialog_run(x, y) {
 
 
 async function Main() {
-  Replay.start();
   try {
     await PROGRAM();
   } catch (e) {
@@ -469,9 +357,7 @@ async function Main() {
       console.dir(e);
       alert(e + '\r\n' + e.stack);
     }
-    return;
   }
-  Replay.stop();
 }
 
 
@@ -535,21 +421,12 @@ function Round(x) {
   return Math.round(x);
 }
 
-
+/**
+ * a === b
+ * @returns {boolean}
+ */
 function jz(a, b) {
   return a === b;
-}
-
-function jnz(a, b) {
-  return a !== b;
-}
-
-function jl(a, b) {
-  return a < b;
-}
-
-function jle(a, b) {
-  return a <= b;
 }
 
 function jg(a, b) {
@@ -680,6 +557,9 @@ let aNowhere_at_tur = 'nowhere_at_turn';
 
 
 async function scene_router() {
+  console.log('Router, current_place=', current_place, 'current_subject=', current_subject);
+
+
   if (current_place === 2) {
     if (current_subject !== -1) {
       await scene_exam();
@@ -2267,7 +2147,7 @@ let aRabociiDenZako = 'Рабочий день закончился, все по
 async function sub_15B3A() {
   let var_2;
 
-  if (!jnz(terkom_has_places, 0)) {
+  if (jz(terkom_has_places, 0)) {
     ClrScr();
     show_header_stats();
     GotoXY(1, 8);
@@ -2304,11 +2184,11 @@ async function sub_15B3A() {
     dialog_start();
     dialog_case(aSidetIZarabati, -1);
 
-    if (!jz(hero.has_mmheroes_disk, 0)) {
+    if (!(hero.has_mmheroes_disk === 0)) {
       dialog_case(aPoigratVMmhe_0, -10);
     }
 
-    if (!jz(hero.has_inet, 0)) {
+    if (!(hero.has_inet === 0)) {
       dialog_case(aPosidetCasokVI, -11);
     }
 
@@ -2316,11 +2196,10 @@ async function sub_15B3A() {
     show_short_today_timesheet(8);
 
     let ax = await dialog_run(1, 0x0C);
-    if (jz(ax, -1)) {
-
+    if (ax === -1) {
       var_2 = Random(Random(hero.charizma + hero.brain)) + 1;
 
-      while (!jle(var_2, 4)) {
+      while (!(var_2 <= 4)) {
         var_2 = Random(var_2 - 3) + 2;
       }
 
@@ -2339,14 +2218,14 @@ async function sub_15B3A() {
       await wait_for_key();
       await hour_pass();
 
-    } else if (!jnz(ax, -2)) {
+    } else if (jz(ax, -2)) {
       GotoXY(1, 0x11);
       output_ik_string(aUxodim___);
       writeln();
       await wait_for_key();
       ClrScr();
       return;
-    } else if (jz(ax, -10)) {
+    } else if (ax === -10) {
       ClrScr();
       TextColor(0x0B);
       output_ik_string(aPoNeizvestnoiP);
@@ -2377,7 +2256,7 @@ async function sub_15B3A() {
 
       var_2 = Random(Random(hero.charizma + hero.brain)) + 1;
 
-      while (!jle(var_2, 4)) {
+      while (!(var_2 <= 4)) {
         var_2 = Random(var_2 - 3) + 2;
       }
 
@@ -2401,50 +2280,42 @@ async function sub_15B3A() {
 } // end function 15B3A
 
 
-let aCtoBratBudem = 'Что брать будем?';
-let aCaiZa2R_ = 'Чай за 2 р.';
-let aKeksZa4R_ = 'Кекс за 4 р.';
-let aCaiIVipecku6R_ = 'Чай и выпечку, 6 р.';
-let aProstoPosijuSP = 'Просто посижу с приятелями.';
-let aQVoobseZrqSuda = 'Я вообще зря сюда зашел.';
-
-
 async function sub_15F9B() {
   ClrScr();
   show_header_stats();
   GotoXY(1, 8);
-  writeln(aCtoBratBudem);
+  writeln('Что брать будем?');
   show_short_today_timesheet(0x0B);
   dialog_start();
 
-  if (!jl(hero.money, 2)) {
-    dialog_case(aCaiZa2R_, -1);
+  if (!(hero.money < 2)) {
+    dialog_case('Чай за 2 р.', -1);
   }
 
-  if (!jl(hero.money, 4)) {
-    dialog_case(aKeksZa4R_, -2);
+  if (!(hero.money < 4)) {
+    dialog_case('Кекс за 4 р.', -2);
   }
 
-  if (!jl(hero.money, 6)) {
-    dialog_case(aCaiIVipecku6R_, -3);
+  if (!(hero.money < 6)) {
+    dialog_case('Чай и выпечку, 6 р.', -3);
   }
 
-  dialog_case(aProstoPosijuSP, -4);
-  dialog_case(aQVoobseZrqSuda, 0);
+  dialog_case('Просто посижу с приятелями.', -4);
+  dialog_case('Я вообще зря сюда зашел.', 0);
   let ax = await dialog_run(1, 0x0B);
 
-  if (!jnz(ax, -1)) {
+  if (jz(ax, -1)) {
     hero.money -= 2;
     hero.health += Random(hero.charizma) + 2;
-  } else if (!jnz(ax, -2)) {
+  } else if (jz(ax, -2)) {
     hero.money -= 4;
     hero.health += Random(hero.charizma) + 4;
-  } else if (!jnz(ax, -3)) {
+  } else if (jz(ax, -3)) {
     hero.money -= 6;
     hero.health += Random(hero.charizma) + 7;
-  } else if (!jnz(ax, -4)) {
+  } else if (jz(ax, -4)) {
     hero.health += Random(hero.charizma);
-  } else if (!jnz(ax, 0)) {
+  } else if (jz(ax, 0)) {
     return;
   }
 
@@ -2469,19 +2340,19 @@ async function scene_punk() {
     dialog_case('Пойти в компьютерный класс', -7);
   }
 
-  if (!jl(time_of_day, 0x0A) && !jg(time_of_day, 0x12)) {
+  if (!(time_of_day < 0x0A) && !jg(time_of_day, 0x12)) {
     dialog_case('Сходить в кафе', -12);
   }
 
-  for (let var_2 = 0; var_2 <= 0xB; ++var_2) {
-    if (!(classmates[var_2].place !== 1)) {
-      if (!(classmates[var_2].current_subject !== -1)) {
-        dialog_case_colored(classmate_names[var_2], var_2, 0xE);
+  for (let i = 0; i <= 0xB; ++i) {
+    if (classmates[i].place === 1) {
+      if (classmates[i].current_subject === -1) {
+        dialog_case_colored(classmate_names[i], i, 0xE);
       }
     }
   }
 
-  if (!jz(hero.is_working_in_terkom, 0) && !jg(time_of_day, 0x12)) {
+  if (!(hero.is_working_in_terkom === 0) && !jg(time_of_day, 0x12)) {
     dialog_case('Пойти в ТЕРКОМ, поработать', -10);
   }
 
@@ -2507,7 +2378,7 @@ async function scene_punk() {
     await sub_15B3A();
   } else if (res === -12) {
     await sub_15F9B();
-  } else if (!jl(res, 0) && !jg(res, 0x0B)) {
+  } else if (!(res < 0) && !jg(res, 0x0B)) {
     await talk_with_classmate(res);
   }
 
@@ -2585,7 +2456,7 @@ async function sub_16622() {
   dialog_case(aNiKKomu_0, -1);
   current_subject = await dialog_run(1, 0x0A);
 
-  if (!jnz(Random(2), 0)) {
+  if (jz(Random(2), 0)) {
     await sub_165D9(current_subject);
   }
 } // end function 16622
@@ -2612,15 +2483,15 @@ async function sub_1673E() {
   show_short_today_timesheet(0x0A);
   dialog_start();
 
-  if (!jl(hero.money, 2)) {
+  if (!(hero.money < 2)) {
     dialog_case(aKofeZa2R_, -1);
   }
 
-  if (!jl(hero.money, 4)) {
+  if (!(hero.money < 4)) {
     dialog_case(aKorjZa4R_, -2);
   }
 
-  if (!jl(hero.money, 6)) {
+  if (!(hero.money < 6)) {
     dialog_case(aKofeIVipecku6R, -3);
   }
 
@@ -2670,7 +2541,7 @@ async function sub_16914() {
     dialog_case(aNetNeBudem, -2);
     let ax = await dialog_run(1, 0x0A);
 
-    if (!jnz(ax, -1)) {
+    if (jz(ax, -1)) {
       hero.money -= 5
       hero.has_ticket = 1;
     }
@@ -2698,32 +2569,25 @@ async function sub_16914() {
 } // end function 16914
 
 
-let aTiVPomi_CtoDel = 'Ты в ПОМИ. Что делать?';
-let aIdtiKPrepodu_0 = 'Идти к преподу';
-let aPosmotretNaDos = 'Посмотреть на доску объявлений';
-let aPoitiVKafe = 'Пойти в кафе';
-let aPoexatVPunk = 'Поехать в ПУНК';
-let aSMenqXvatit_3 = 'С меня хватит!';
-
-
 async function scene_pomi() {
   show_header_stats();
   TextColor(7);
   GotoXY(1, 8);
-  writeln(aTiVPomi_CtoDel);
+  writeln('Ты в ПОМИ. Что делать?');
   dialog_start();
-  dialog_case(aIdtiKPrepodu_0, -1);
-  dialog_case(aPosmotretNaDos, -2);
-  dialog_case(aPoitiVKafe, -3);
-  dialog_case(aPoexatVPunk, -4);
+  dialog_case('Идти к преподу', -1);
+  dialog_case('Посмотреть на доску объявлений', -2);
+  dialog_case('Пойти в кафе', -3);
+  dialog_case('Поехать в ПУНК', -4);
 
+  debugger;
   for (let var_2 = 0; var_2 <= 0xB; ++var_2) {
     if (classmates[var_2].place === 2 && classmates[var_2].current_subject === -1) {
       dialog_case_colored(classmate_names[var_2], var_2, 0xE);
     }
   }
 
-  dialog_case_colored(aSMenqXvatit_3, -5, 9);
+  dialog_case_colored('С меня хватит!', -5, 9);
   show_short_today_timesheet(0x0A);
 
   const res = await dialog_run(1, 0x0A);
@@ -2738,7 +2602,7 @@ async function scene_pomi() {
     await sub_16914();
   } else if (res === -5) {
     await request_exit();
-  } else if (!jl(res, 0) && !jg(res, 0x0B)) {
+  } else if (!(res < 0) && !jg(res, 0x0B)) {
     await talk_with_classmate(res);
   }
 
@@ -2996,18 +2860,18 @@ async function sub_175A6() {
     var_6 -= Random(5 - hero.health);
   }
 
-  if (!jle(var_6, 0)) {
+  if (!(var_6 <= 0)) {
     var_6 = Round(Sqrt(var_6) / subjects[current_subject].member0x100);
   } else {
     var_6 = 0;
   }
 
-  if (!jle(hero.subject[current_subject].tasks_done + var_6, subjects[current_subject].tasks)) {
+  if (!(hero.subject[current_subject].tasks_done + var_6 <= subjects[current_subject].tasks)) {
     var_6 = subjects[current_subject].tasks - hero.subject[current_subject].tasks_done;
   }
 
   var_2 = Random(hero.stamina) - Random(subjects[current_subject].member0xFA);
-  if (!jle(var_2, 0)) {
+  if (!(var_2 <= 0)) {
     var_2 = 0;
   }
 
@@ -3017,7 +2881,7 @@ async function sub_175A6() {
   }
 
   var_4 = Random(idiv(hero.stamina * 2, 3)) - subjects[current_subject].member0xFC;
-  if (!jle(var_4, 0)) {
+  if (!(var_4 <= 0)) {
     var_4 = 0;
   }
 
@@ -3025,7 +2889,7 @@ async function sub_175A6() {
   if (hero.health <= 0) {
     is_end = 1;
     death_cause = subjects[current_subject].professor.name + ' замучил';
-    if (!jnz(subjects[current_subject].professor.sex, 0)) {
+    if (jz(subjects[current_subject].professor.sex, 0)) {
       death_cause += 'а';
     }
     death_cause += '.';
@@ -3064,7 +2928,7 @@ async function sub_17AA2() {
   show_header_stats();
   GotoXY(1, 0x0C);
 
-  if (!jle(time_of_day, 0x14)) {
+  if (!(time_of_day <= 0x14)) {
     TextColor(7);
     write('М.А. Всемирнов :');
     TextColor(0x0F);
@@ -3081,7 +2945,7 @@ async function sub_17AA2() {
   writeln('Есть надежда, что в электричке удастся что-то еще решить.');
   writeln('Правда, зачетной ведомости с собой туда не взять...');
 
-  if (jl(hero.money, 0x0A)) {
+  if (hero.money < 0x0A) {
     TextColor(0x0C);
     writeln('Денег у тебя нет, пришлось ехать зайцем...');
 
@@ -3280,7 +3144,7 @@ async function sub_183A0() {
     hero.stamina += Random(3) + 1;
     sub_17FAD(aTiGotovKLubimI);
   } else if (ax === 0xA) {
-    if (!jle(hero.money, 0)) {
+    if (!(hero.money <= 0)) {
       hero.money = 0;
       sub_17FAD(aPokaTvoiGlazaB);
     } else {
@@ -3335,18 +3199,18 @@ async function sub_18677() {
     bp_var_4 -= Random(5 - hero.health);
   }
 
-  if (!jle(bp_var_4, 0)) {
+  if (!(bp_var_4 <= 0)) {
     bp_var_4 = Round(Sqrt(bp_var_4) / subjects[current_subject].member0x100);
   } else {
     bp_var_4 = 0;
   }
 
-  if (!jle(hero.subject[current_subject].tasks_done + bp_var_4, subjects[current_subject].tasks)) {
+  if (!(hero.subject[current_subject].tasks_done + bp_var_4 <= subjects[current_subject].tasks)) {
     bp_var_4 = subjects[current_subject].tasks - hero.subject[current_subject].tasks_done;
   }
 
   let var_4 = Random(hero.stamina) - Random(subjects[current_subject].member0xFA);
-  if (!jle(var_4, 0)) {
+  if (!(var_4 <= 0)) {
     var_4 = 0;
   }
 
@@ -3355,7 +3219,7 @@ async function sub_18677() {
     hero.subject[current_subject].knowledge = 0;
   }
 
-  if (!jnz(current_subject, 2) && !jge(hero.charizma * 2 + 0x1A, hero.subject[current_subject].knowledge)) {
+  if (jz(current_subject, 2) && !jge(hero.charizma * 2 + 0x1A, hero.subject[current_subject].knowledge)) {
     GotoXY(1, 0x14);
     TextColor(7);
     write(aPodkoritov);
@@ -3365,7 +3229,7 @@ async function sub_18677() {
   }
 
   GotoXY(1, 0x15);
-  if (!jnz(bp_var_4, 0)) {
+  if (jz(bp_var_4, 0)) {
     colored_output(0x0C, aTvoiMuceniqB_0);
   } else {
     colored_output(0x0A, aTebeZacliEse_0);
@@ -3385,10 +3249,10 @@ async function sub_18677() {
   }
 
   hero.health += var_2;
-  if (jle(hero.health, 0)) {
+  if (hero.health <= 0) {
     is_end = 1;
     death_cause = subjects[current_subject].professor.name + aZamucil_0;
-    if (!jnz(subjects[current_subject].professor.sex, 0)) {
+    if (jz(subjects[current_subject].professor.sex, 0)) {
       death_cause += aA_0;
     }
     death_cause += a__0;
@@ -3437,14 +3301,14 @@ async function scene_exam() {
     return;
   }
 
-  if (jle(hero.health, 0) || !jz(is_end, 0)) {
+  if ((hero.health <= 0) || !(is_end === 0)) {
     return;
   }
 
   ClrScr();
   show_header_stats();
 
-  if (!jl(hero.subject[current_subject].tasks_done, subjects[current_subject].tasks)) {
+  if (!(hero.subject[current_subject].tasks_done < subjects[current_subject].tasks)) {
     writeln();
     TextColor(0x0A);
     writeln(aUVasVseZacteno);
@@ -3462,7 +3326,7 @@ async function scene_exam() {
         return;
       }
 
-      if (!jz(is_end, 0)) {
+      if (!(is_end === 0)) {
         return;
       }
     }
@@ -3482,7 +3346,7 @@ async function scene_exam() {
 
   let var_4 = 0;
   for (var_2 = 0; var_2 <= 0xB; ++var_2) {
-    if (jz(classmates[var_2].current_subject, current_subject) || !(current_place !== 3)) {
+    if ((classmates[var_2].current_subject === current_subject) || !(current_place !== 3)) {
       if (!(classmates[var_2].place !== current_place)) {
         if (!jnb(var_2, 0x10)) {
           var_6 |= 1 << var_2;
@@ -3498,15 +3362,13 @@ async function scene_exam() {
 
     if (!(var_4 !== 1)) {
       write(aIt);
-    } else if (!jle(var_4, 1)) {
+    } else if (!(var_4 <= 1)) {
       write(aQt);
     }
 
     for (var_2 = 0; var_2 <= 0xB; ++var_2) {
-
       if (jb(var_2, 0x10)) {
         if (var_6 & (1 << var_2)) {
-
           write(classmate_names[var_2]);
 
           --var_4;
@@ -3532,16 +3394,16 @@ async function scene_exam() {
       break;
     }
 
-    if (!jle(var_14, 3)) {
+    if (!(var_14 <= 3)) {
       break;
     }
 
     for (var_2 = 0; var_2 <= 0xB; ++var_2) {
-      if (jz(var_12[var_2], 0)) {
+      if ((var_12[var_2] === 0)) {
         if (classmates[var_2].member0x32C - idiv(var_14, 2) - hero.garlic > Random(0x0A)) {
           if (!jnb(var_2, 0x10)) {
             if (var_6 & (1 << var_2)) {
-              if (!jle(idiv(hero.charizma, 2), var_14)) {
+              if (!(idiv(hero.charizma, 2) <= var_14)) {
                 var_12[var_2] = 1;
 
                 ++var_14;
@@ -3552,7 +3414,7 @@ async function scene_exam() {
                   return;
                 } else {
                   await check_exams_left_count();
-                  if (!jz(is_end, 0)) {
+                  if (!(is_end === 0)) {
                     return;
                   } else {
                     ClrScr();
@@ -3604,7 +3466,7 @@ async function scene_exam() {
     await sub_18677();
   } else if (var_2 === -2) {
     current_subject = -1;
-  } else if (!jl(var_2, 0) && !jg(var_2, 0xB)) {
+  } else if (!(var_2 < 0) && !jg(var_2, 0xB)) {
     await talk_with_classmate(var_2);
   }
 
@@ -3623,7 +3485,7 @@ async function sub_18FB2(arg_0) {
   let var_4;
   let var_1;
 
-  if (!(!jnz(arg_0, 3) && !jnz(current_place, 3))) {
+  if (!(jz(arg_0, 3) && jz(current_place, 3))) {
 
     writeln();
     write(aKTebePristaet);
@@ -4057,7 +3919,7 @@ async function sub_1B09A() {
   write(aSerj_0);
   TextColor(0x0F);
 
-  if (!(!ja(Random(hero.charizma), Random(3) + 2)) && !jle(hero.charizma * 2 + 0x14, hero.health)) {
+  if (!(!ja(Random(hero.charizma), Random(3) + 2)) && !(hero.charizma * 2 + 0x14 <= hero.health)) {
 
     writeln(aNaGlotniKefirc);
     hero.health += hero.charizma + Random(hero.charizma);
@@ -4128,7 +3990,7 @@ async function sub_1B09A() {
     TextColor(7);
     writeln(aSerjUxoditKuda);
     classmates[Serzg].current_subject = -1;
-    if (!jnz(classmates[Serzg].place, 5)) {
+    if (jz(classmates[Serzg].place, 5)) {
       classmates[Serzg].place = 0;
     } else {
       classmates[Serzg].place = 5;
@@ -4145,7 +4007,7 @@ async function sub_1B526() {
   ClrScr();
   show_header_stats();
 
-  if (!jnz(hero.got_stipend, 0)) {
+  if (jz(hero.got_stipend, 0)) {
     hero.got_stipend = 1
     GotoXY(1, 8);
     output_with_highlighted_num(7, 'Паша вручает тебе твою стипуху за май: ', 0x0F, 0x32, ' руб.');
@@ -4202,7 +4064,7 @@ async function sub_1B6B7() {
   writeln(aCegoTebeNadoOt);
   var_2 = await dialog_run(1, 0x0B);
 
-  if (!jnz(var_2, -1)) {
+  if (jz(var_2, -1)) {
     GotoXY(1, 0x0F);
     writeln(aKakZnaes___);
   } else {
@@ -4246,7 +4108,7 @@ async function sub_1B986() {
   ClrScr();
   show_header_stats();
 
-  if (!jnz(current_subject, -1)) {
+  if (jz(current_subject, -1)) {
     GotoXY(1, 8);
     TextColor(7);
     writeln(aTiZavodisSNilS);
@@ -4380,7 +4242,7 @@ async function sub_1C02B() {
   if (jge(5, var_8)) {
     for (var_4 = 5; var_4 >= var_8; --var_4) {
       if (hero.charizma > Random(0x12)) {
-        if (!jnz(timesheet[var_4][Infa].where, 0)) {
+        if (jz(timesheet[var_4][Infa].where, 0)) {
           if (var_1 === 0) {
             var_1 = 1;
             var_6 = var_4;
@@ -4501,20 +4363,20 @@ function sub_1C6DC(/*arg_0*/) {
       bp_var_8 -= Random(5 - hero.health);
     }
 
-    if (!jle(bp_var_8, 0)) {
+    if (!(bp_var_8 <= 0)) {
       bp_var_8 = Round(Sqrt(bp_var_8) / subjects[current_subject].member0x100);
     } else {
       bp_var_8 = 0;
     }
 
-    if (!jle(hero.subject[current_subject].tasks_done + bp_var_8, subjects[current_subject].tasks)) {
+    if (!(hero.subject[current_subject].tasks_done + bp_var_8 <= subjects[current_subject].tasks)) {
       bp_var_8 = subjects[current_subject].tasks - hero.subject[current_subject].tasks_done;
     }
 
     write(aQPodozrevauC_0);
     write(subjects[bp_var_6].professor.name);
 
-    if (!jnz(bp_var_8, 0)) {
+    if (jz(bp_var_8, 0)) {
       writeln(aNicegoTebeNeZa);
     } else {
       write(aZactetTebeZa1Z);
@@ -4529,19 +4391,6 @@ function sub_1C6DC(/*arg_0*/) {
 } // end function 1C6DC
 
 
-let aObratitSqKAndr = 'Обратиться к Эндрю за помощью?';
-let aDaCemQXujeDrug = 'Да, чем я хуже других?';
-let aNetQUjKakNibud = 'Нет, я уж как-нибудь сам...';
-let aAndruVglqdivae = 'Эндрю вглядывается в твои задачки,';
-let aINacinaetDumat = 'и начинает думать очень громко...';
-let aPokaAndruTakNa = 'Пока Эндрю так напрягается, ты не можешь ни на чем сосредоточиться!';
-let aUAndruNicegoNe = 'У Эндрю ничего не вышло...';
-let aAndruResilTebe = 'Эндрю решил тебе ';
-let aNadoBudetPodoi = 'Надо будет подойти с зачеткой!';
-let aAndruTebqIgnor = 'Эндрю тебя игнорирует!';
-let aAndruTojeUmeet = 'Эндрю тоже умеет отбиваться от разных нехороших людей.';
-
-
 async function sub_1CC94() {
   let var_6;
   let var_4;
@@ -4553,35 +4402,35 @@ async function sub_1CC94() {
   if (current_subject === -1) {
     sub_1C6DC();
   } else {
-    write(aObratitSqKAndr);
+    write('Обратиться к Эндрю за помощью?');
     dialog_start();
-    dialog_case(aDaCemQXujeDrug, -1);
-    dialog_case(aNetQUjKakNibud, -2);
+    dialog_case('Да, чем я хуже других?', -1);
+    dialog_case('Нет, я уж как-нибудь сам...', -2);
     let ax = await dialog_run(1, 0x0A);
 
     if (ax === -1) {
 
       var_4 = Random(0x0E);
-      if (jl(var_4, hero.charizma)) {
+      if (var_4 < hero.charizma) {
 
         GotoXY(1, 0x0D);
-        writeln(aAndruVglqdivae);
-        writeln(aINacinaetDumat);
-        writeln(aPokaAndruTakNa);
+        writeln('Эндрю вглядывается в твои задачки,');
+        writeln('и начинает думать очень громко...');
+        writeln('Пока Эндрю так напрягается, ты не можешь ни на чем сосредоточиться!');
 
         var_6 = Trunc(Sqrt(Random(subjects[current_subject].tasks - hero.subject[current_subject].tasks_done)));
 
-        if (!jle(var_6, 2)) {
+        if (!(var_6 <= 2)) {
           var_6 = 0;
         }
 
         hero.stamina -= Random(2);
 
-        if (!jnz(var_6, 0)) {
-          writeln(aUAndruNicegoNe);
+        if (jz(var_6, 0)) {
+          writeln('У Эндрю ничего не вышло...');
         } else {
           TextColor(7);
-          write(aAndruResilTebe);
+          write('Эндрю решил тебе ');
           TextColor(0x0F);
           write(var_6);
           TextColor(7);
@@ -4589,8 +4438,8 @@ async function sub_1CC94() {
           writeln('!');
 
           hero.subject[current_subject].tasks_done += var_6;
-          if (!jl(hero.subject[current_subject].tasks_done, subjects[current_subject].tasks)) {
-            writeln(aNadoBudetPodoi);
+          if (!(hero.subject[current_subject].tasks_done < subjects[current_subject].tasks)) {
+            writeln('Надо будет подойти с зачеткой!');
           }
         }
 
@@ -4599,8 +4448,8 @@ async function sub_1CC94() {
       } else {
         GotoXY(1, 0x0D);
         TextColor(0x0C);
-        writeln(aAndruTebqIgnor);
-        decrease_health(Random(5) + 2, aAndruTojeUmeet);
+        writeln('Эндрю тебя игнорирует!');
+        decrease_health(Random(5) + 2, 'Эндрю тоже умеет отбиваться от разных нехороших людей.');
       }
 
     } else if (ax === -2) {
@@ -4670,7 +4519,7 @@ async function sub_1D30D() {
 
   } else {
 
-    if (hero.charizma > Random(0x14) && !jnz(hero.has_inet, 0)) {
+    if (hero.charizma > Random(0x14) && jz(hero.has_inet, 0)) {
       writeln(aKstatiQTutZnau);
       TextColor(7);
       writeln();
@@ -4728,7 +4577,7 @@ async function sub_1D30D() {
         hero.charizma += Random(2);
       }
 
-      if (!jnz(Random(3), 0)) {
+      if (jz(Random(3), 0)) {
         writeln(aIEseOdinCasPro);
         await hour_pass();
       }
@@ -4984,13 +4833,13 @@ async function sub_1E5A3() {
     var_4 = 2;
   }
 
-  if (!jnz(Random(2), 0)) {
+  if (jz(Random(2), 0)) {
     if (var_4 === 1) {
       await sub_1DA3D();
     } else if (var_4 === 2) {
       await sub_1E37C();
     } else {
-      if (!jnz(Random(3), 0)) {
+      if (jz(Random(3), 0)) {
         await sub_1DF40();
       }
     }
@@ -5021,19 +4870,19 @@ async function goto_sleep() {
   current_subject = -1;
   current_place = 4;
 
-  if (!jle(day_of_week, 5)) {
+  if (!(day_of_week <= 5)) {
     is_end = 1;
     death_cause = aVremqVislo_;
     return;
   }
 
-  if (!jle(hero.health, 0x28)) {
+  if (!(hero.health <= 0x28)) {
     hero.health = 0x28;
   }
 
   var_2 = hero.health + 0xF + Random(0x14);
 
-  if (!jle(var_2, 0x32)) {
+  if (!(var_2 <= 0x32)) {
     var_2 = 0x32;
   }
 
@@ -5204,12 +5053,16 @@ function is_professor_here(subj) {
   }
 } // end function 1EBE0
 
-
+/**
+ *
+ * @param subj
+ * @returns {boolean}
+ */
 function is_professor_here_today(subj) {
   if (day_of_week >= 0 && day_of_week <= 5) {
     return timesheet[day_of_week][subj].where === current_place;
   } else {
-    return 0;
+    return false;
   }
 } // end function 1EC48
 
@@ -5229,7 +5082,7 @@ function sub_1EC97(/*arg_0*/) {
 } // end function 1EC97
 
 
-function locatePasha(/*arg_0*/) {
+function updatePasha(/*arg_0*/) {
   // #warning arg_0, [arg_0 + var_2 + 0|1]
   let bp_var_2 = [0, 0];
 
@@ -5242,13 +5095,13 @@ function locatePasha(/*arg_0*/) {
   classmates[Pasha].current_subject = -1;
 
   do {
-    for (let var_2 = 0; var_2 <= 2; ++var_2) {
-      if (!jz(is_professor_here_today(var_2), 0)) {
+    for (let i = 0; i <= 2; ++i) {
+      if (is_professor_here_today(i)) {
         bp_var_2[0] = 1;
         if (!jbe(Random(0x0A), 5)) {
           bp_var_2[1] = 1;
-          classmates[Pasha].place = timesheet[day_of_week][var_2].where;
-          classmates[Pasha].current_subject = var_2;
+          classmates[Pasha].place = timesheet[day_of_week][i].where;
+          classmates[Pasha].current_subject = i;
         }
       }
     }
@@ -5271,12 +5124,12 @@ function sub_1ED56(/*arg_0*/) {
 
   classmates[Diamond].current_subject = -1;
 
-  for (let var_2 = 5; var_2 >= 0; --var_2) {
-    if (!jz(is_professor_here_today(var_2), 0)) {
+  for (let i = 5; i >= 0; --i) {
+    if (is_professor_here_today(i)) {
       if (bp_var_2[1] === 0) {
         if (!jbe(Random(0x0A), 5)) {
-          classmates[Diamond].place = timesheet[day_of_week][var_2].where;
-          classmates[Diamond].current_subject = var_2;
+          classmates[Diamond].place = timesheet[day_of_week][i].where;
+          classmates[Diamond].current_subject = i;
         }
       }
     }
@@ -5320,21 +5173,21 @@ function sub_1EE2C(/*arg_0*/) {
   classmates[Misha].current_subject = -1;
 
   do {
-    for (let var_2 = 4; var_2 >= 0; --var_2) {
+    for (let i = 4; i >= 0; --i) {
 
-      if (!jz(is_professor_here_today(var_2), 0)) {
-        if (!jz(var_2, 3)) {
+      if (is_professor_here_today(i)) {
+        if (!(i === 3)) {
           bp_var_2[0] = 1;
 
           if (!jbe(Random(0x0A), 5)) {
             bp_var_2[1] = 1;
-            classmates[Misha].place = timesheet[day_of_week][var_2].where;
-            classmates[Misha].current_subject = var_2;
+            classmates[Misha].place = timesheet[day_of_week][i].where;
+            classmates[Misha].current_subject = i;
           }
         }
       }
     }
-  } while (!jnz(bp_var_2[1], 0) && jnz(bp_var_2[0], 0));
+  } while (jz(bp_var_2[1], 0) && (bp_var_2[0] !== 0));
 
 } // end function 1EE2C
 
@@ -5352,18 +5205,17 @@ function sub_1EECC(/*arg_0*/) {
   classmates[Serzg].current_subject = -1;
 
   do {
-    for (let var_2 = 5; var_2 >= 0; --var_2) {
-
-      if (!jz(is_professor_here_today(var_2), 0)) {
+    for (let i = 5; i >= 0; --i) {
+      if (is_professor_here_today(i)) {
         bp_var_2[0] = 1;
         if (!jbe(Random(0x0A), 5)) {
           bp_var_2[1] = 1;
-          classmates[Serzg].place = timesheet[day_of_week][var_2].where;
-          classmates[Serzg].current_subject = var_2;
+          classmates[Serzg].place = timesheet[day_of_week][i].where;
+          classmates[Serzg].current_subject = i;
         }
       }
     }
-  } while (!jnz(bp_var_2[1], 0) && jnz(bp_var_2[0], 0));
+  } while (jz(bp_var_2[1], 0) && (bp_var_2[0] !== 0));
 
 } // end function 1EECC
 
@@ -5371,7 +5223,7 @@ function sub_1EECC(/*arg_0*/) {
 function sub_1EF66(/*arg_0*/) {
   classmates[Sasha].current_subject = -1;
   if (time_between_9_and_19()) {
-    if (!jnz(Random(4), 0)) {
+    if (jz(Random(4), 0)) {
       classmates[Sasha].place = 1;
     } else {
       classmates[Sasha].place = 0;
@@ -5391,7 +5243,7 @@ function sub_1EF9E(/*arg_0*/) {
 
   do {
     for (let var_2 = 0; var_2 <= 2; ++var_2) {
-      if (!jz(is_professor_here_today(var_2), 0)) {
+      if (is_professor_here_today(var_2)) {
         bp_var_2[0] = 1;
         if (!jbe(Random(0x0A), 5)) {
           bp_var_2[1] = 1;
@@ -5400,13 +5252,13 @@ function sub_1EF9E(/*arg_0*/) {
         }
       }
     }
-  } while (!jnz(bp_var_2[1], 0) && jnz(bp_var_2[0], 0));
+  } while (jz(bp_var_2[1], 0) && (bp_var_2[0] !== 0));
 
 } // end function 1EF9E
 
 
 function sub_1F025(/*arg_0*/) {
-  if (time_between_9_and_19() && !jnz(Random(4), 0)) {
+  if (time_between_9_and_19() && jz(Random(4), 0)) {
     classmates[Kuzmenko].place = 3;
     classmates[Kuzmenko].current_subject = -1;
   } else {
@@ -5426,21 +5278,20 @@ function sub_1F06D() {
   classmates[Endryu].place = 1;
   classmates[Endryu].current_subject = 1;
 
-  for (let var_2 = 0; var_2 <= 2; ++var_2) {
-    if (!jz(is_professor_here_today(var_2), 0)) {
+  for (let i = 0; i <= 2; ++i) {
+    if (is_professor_here_today(i)) {
       if (!jbe(Random(0x0A), 5)) {
-        classmates[Endryu].place = timesheet[day_of_week][var_2].where;
-        classmates[Endryu].current_subject = var_2;
+        classmates[Endryu].place = timesheet[day_of_week][i].where;
+        classmates[Endryu].current_subject = i;
       }
     }
   }
-
 } // end function 1F06D
 
 
 function sub_1F0C6() {
   classmates[Grisha].current_subject = -1;
-  if (!jnz(Random(3), 0)) {
+  if (jz(Random(3), 0)) {
     classmates[Grisha].place = 5;
   } else {
     classmates[Grisha].place = 0;
@@ -5454,7 +5305,7 @@ function sub_1F0EA(arg_0) {
   } else if (arg_0 === 2) {
     sub_1ED56();
   } else if (arg_0 === 1) {
-    locatePasha();
+    updatePasha();
   } else if (arg_0 === 3) {
     sub_1EDCC();
   } else if (arg_0 === 4) {
@@ -5633,7 +5484,7 @@ function show_header_stats() {
   colored_output(7, aFinansi);
 
 
-  if (!jle(hero.money, 0)) {
+  if (!(hero.money <= 0)) {
     TextColor(0x0F);
     write(hero.money);
     TextColor(7);
@@ -6015,20 +5866,15 @@ async function wait_for_key() {
 } // end function 208B8
 
 
-let aVProgrammeBuga = 'В программе буга! Код : ';
-let aSrocnoObratite = 'Срочно обратитесь к разработчику ;)';
-let aRazdavlenBezja = 'Раздавлен безжалостной ошибкой в программе.';
-
-
 async function bug_report(bug_str) {
   ClrScr();
   current_color = 0x8F;
-  write(aVProgrammeBuga);
+  write('В программе буга! Код : ');
   writeln(bug_str);
-  writeln(aSrocnoObratite);
+  writeln('Срочно обратитесь к разработчику ;)');
   is_end = 1;
   hero.health = -100;
-  death_cause = aRazdavlenBezja;
+  death_cause = 'Раздавлен безжалостной ошибкой в программе.';
   await wait_for_key();
 } // end function 2095D
 
@@ -6076,17 +5922,6 @@ function dialog_show(x, y) {
 
 
 ////////////////
-
-function report_bug() {
-  let s = JSON.stringify(Replay.data);
-  alert('Send this string to developer and tell him what happened\r\n\r\n' + s);
-}
-
-function dev_replay() {
-  Replay.data = JSON.parse(prompt('Paste string from tester'));
-  Replay.data.on = 1;
-  Main();
-}
 
 Main().catch(err => {
   console.error(err);
