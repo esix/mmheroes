@@ -251,7 +251,7 @@ function TextColor(col) {
   current_color = current_color & 0xF0 | col;
 }
 
-function Delay(pause) { /*let start = new Date().getTime(); while (new Date().getTime - start < pause);*/
+function Delay(pause) {
   return new Promise(resolve => {
     window.setTimeout(resolve, pause);
   });
