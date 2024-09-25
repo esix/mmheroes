@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = {
+const webConfig =  {
+  target: 'web',
   module: {
     rules: [
       {
@@ -10,6 +11,13 @@ module.exports = {
           loader: 'babel-loader',
         },
       },
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader'
+        ],
+      }
     ],
   },
   plugins: [
@@ -19,3 +27,5 @@ module.exports = {
     }),
   ],
 };
+
+module.exports = [webConfig];

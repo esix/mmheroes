@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Герои мата и меха</title>
   <style type="text/css">
-    body { background: black; font: 12pt 'lucida console','menlo',monospace; line-height: 11px; }
+    html {font: 12pt 'lucida console','menlo',monospace; line-height: 11px;}
+    body { background: black;  }
+
+    #content {
+      zoom: 0.3;}
 
     #screen { border-collapse: collapse; }
     #screen td { width: 10px; height: 16px; text-align: center; vertical-align: middle; padding: 0px; border: 0px; }
@@ -35,9 +39,13 @@
     .fg13 {color: #f0f}
     .fg14 {color: #ff0}
     .fg15 {color: #fff}
+
+    #terminal { border: 2px solid green; height: 30rem; }
+    .xterm-viewport {overflow: hidden !important;}
   </style>
 </head>
 <body>
+  <div id="terminal"></div>
   <div id="content"></div>
 </body>
 </html>

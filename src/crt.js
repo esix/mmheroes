@@ -1,3 +1,50 @@
+import { Terminal } from "@xterm/xterm";
+import "@xterm/xterm/css/xterm.css";
+import ansi from 'ansi-escape-sequences'
+
+export const term = new Terminal({
+  cols: 80,
+  rows: 25,
+  scrollback: 0,
+  cursorInactiveStyle: 'none',
+  cursorStyle: 'underline',
+  // disableStdin: true,
+});
+term.open(document.getElementById('terminal'));
+term.onKey((e) => {
+  onKeyDown(e.domEvent);
+});
+
+
+// My little and buggy implementation of pascal
+export let Screen = [];
+export let ScreenColor = [];
+
+export let PositionR = 0, PositionC = 0;
+export function _setPositionC(v) { PositionC = v; }
+export function _setPositionR(v) { PositionR = v; }
+
+
+
+function __CrtInit() {
+  for (let i = 0; i < 25; ++i) {
+    Screen.push([]);
+    ScreenColor.push([]);
+    for (let j = 0; j < 80; ++j) {
+      Screen[i].push(' ');
+      ScreenColor[i].push(0x07);
+    }
+  }
+
+  term.clear();
+}
+
+__CrtInit();
+
+export let current_color;
+
+
+
 const keyBuffer = [];
 const readKeyWaiters = [];
 
@@ -22,5 +69,72 @@ export function ReadKey() {
     } else {
       readKeyWaiters.push(resolve);
     }
+  });
+}
+
+export function ClrScr() {
+  PositionC = 0;
+  PositionR = 0;
+
+  for (let i = 0; i < 25; ++i) {
+    for (let j = 0; j < 80; ++j) {
+      Screen[i][j] = ' ';
+      ScreenColor[i][j] = 0x07;
+    }
+  }
+
+  // term.clear();
+  term.write(ansi.erase.display(2));
+  term.write(ansi.cursor.position(0, 0));
+}
+
+
+
+export function GotoXY(x, y) {
+  PositionR = y - 1;
+  PositionC = x - 1;
+
+  term.write(ansi.cursor.position(y, x));
+}
+
+export function TextColor(color) {
+  current_color = current_color & 0xF0 | (color & 0x0f);
+}
+
+export function TextBackground(color) {
+  current_color = current_color & 0x0F | ((color & 0x0f) << 4);
+}
+
+export function WhereY() {
+  return PositionR;
+}
+
+
+
+export function _update_screen() {
+  let html = '';
+  html += '<table id="screen">';
+  for (let i = 0; i < 25; ++i) {
+    html += '<tr>';
+    for (let j = 0; j < 80; ++j) {
+      html += '<td class="fg' + (ScreenColor[i][j] & 0xF) + ' bg' + (ScreenColor[i][j] >> 4) + '">' +
+          Screen[i][j] + '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+
+  document.getElementById('content').innerHTML = html;
+}
+
+
+export function _set_current_color(cc) {
+  current_color = cc;
+}
+
+
+export function Delay(pause) {
+  return new Promise(resolve => {
+    window.setTimeout(resolve, pause);
   });
 }
