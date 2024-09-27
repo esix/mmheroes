@@ -617,33 +617,22 @@ async function game_end() {
 } // end function 11029
 
 
-let aDisclaimer = 'DISCLAIMER';
-let a1_VsePersonaji = '1.) Все персонажи реальны. Эта программа является лишь неким отражением';
-let aMneniqEeAvtora = '    мнения ее автора об окружающей действительности.';
-let aAvtorNeStavilC = '    Автор не ставил цели оценить чью-либо линию поведения.';
-let a2_PoctiVseSobi = '2.) Почти все события реальны. Естественно, многие из них';
-let aPredstavleniVN = '    представлены в несколько аллегорическом виде.';
-let a3_VseSovpadeni = '3.) Все совпадения с другими реальными зачетными неделями,';
-let aProvedennimiKe = '    проведенными кем-либо в каком-либо ВУЗе, лишь подчеркивают';
-let aRealisticnostV = '    реалистичность взглядов автора на реальность.';
-
-
 async function show_disclaimer() {
   ClrScr();
   TextColor(0x0A);
-  Writeln(aDisclaimer);
+  Writeln('DISCLAIMER');
   Writeln();
   TextColor(9);
-  Writeln(a1_VsePersonaji);
-  Writeln(aMneniqEeAvtora);
-  Writeln(aAvtorNeStavilC);
+  Writeln('1.) Все персонажи реальны. Эта программа является лишь неким отражением');
+  Writeln('    мнения ее автора об окружающей действительности.');
+  Writeln('    Автор не ставил цели оценить чью-либо линию поведения.');
   Writeln();
-  Writeln(a2_PoctiVseSobi);
-  Writeln(aPredstavleniVN);
+  Writeln('2.) Почти все события реальны. Естественно, многие из них');
+  Writeln('    представлены в несколько аллегорическом виде.');
   Writeln();
-  Writeln(a3_VseSovpadeni);
-  Writeln(aProvedennimiKe);
-  Writeln(aRealisticnostV);
+  Writeln('3.) Все совпадения с другими реальными зачетными неделями,');
+  Writeln('    проведенными кем-либо в каком-либо ВУЗе, лишь подчеркивают');
+  Writeln('    реалистичность взглядов автора на реальность.');
   Writeln();
   Writeln();
   TextColor(0x0C);
@@ -663,15 +652,11 @@ function goto_kompy_to_obschaga() {
 } // end function 11450
 
 
-let aNeSmogRasstatS = 'Не смог расстаться с компьютером.';
-
-
 function goto_kompy_to_punk() {
   current_place = 1;
   current_subject = -1;
-  decrease_health(2, aNeSmogRasstatS);
+  decrease_health(2, 'Не смог расстаться с компьютером.');
 } // end function 11482
-
 
 
 async function goto_kompy_to_pomi() {
@@ -1110,7 +1095,6 @@ async function goto_obschaga_to_pomi() {
       hero.money -= 10;
       hero.has_ticket = 1;
     }
-
   }
 
   await wait_for_key();
@@ -2660,11 +2644,6 @@ async function sub_18677() {
 } // end function 18677
 
 
-let aUTebqUjeVseZac = 'У тебя уже все зачтено.';
-let aMucatSqDalSe = 'Мучаться дальше';
-let aBrositAtoDelo = 'Бросить это дело';
-
-
 async function scene_exam() {
   let var_15;
   let var_14;
@@ -2827,13 +2806,13 @@ async function scene_exam() {
       colored_output_white(subjects[current_subject].tasks);
       Writeln();
     } else {
-      colored_output_ln(0x0A, aUTebqUjeVseZac);
+      colored_output_ln(0x0A, 'У тебя уже все зачтено.');
     }
   }
 
   dialog_start();
   if (!(hero.subject[current_subject].passed !== 0)) {
-    dialog_case(aMucatSqDalSe, -1);
+    dialog_case('Мучаться дальше', -1);
   }
 
   for (var_2 = 0; var_2 <= 0xB; ++var_2) {
@@ -2844,7 +2823,7 @@ async function scene_exam() {
     }
   }
 
-  dialog_case(aBrositAtoDelo, -2);
+  dialog_case('Бросить это дело', -2);
   show_short_today_timesheet(0x0C);
   var_2 = await dialog_run(1, 0x0C);
   if (var_2 === -1) {
@@ -3319,7 +3298,6 @@ async function sub_1B526() {
 
   await wait_for_key();
   ClrScr();
-
 } // end function 1B526
 
 
@@ -4024,7 +4002,7 @@ async function goto_sleep() {
 
     if (day_of_week > 5) {
       is_end = 1;
-      death_cause = aVremqVislo_;
+      death_cause = 'Время вышло.';
     } else {
       // #warning new code
     }
