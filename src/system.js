@@ -8,6 +8,12 @@ function _crlf() {
   term.write('\r\n');
 }
 
+
+const COLORS = '#000000 #0000aa #00aa00 #00aaaa #aa0000 #aa00aa #aa5500 #aaaaaa #555555 #5555ff #55ff55 #55ffff #ff5555 #ff55ff #ffff55 #ffffff'
+    .split(' ')
+    .map(s => [parseInt(s.slice(1, 3), 16), parseInt(s.slice(1, 5), 16), parseInt(s.slice(5, 7), 16)]);
+
+
 export function Write(str) {
   str = '' + str;
   for (let i = 0; i < str.length; ++i) {
@@ -16,25 +22,6 @@ export function Write(str) {
     _setPositionC(PositionC + 1);
   }
   _update_screen();
-
-  const COLORS = [
-    [0x00, 0x00, 0x00],
-    [0x00, 0x00, 0x80],
-    [0x00, 0x80, 0x00],
-    [0x00, 0x80, 0x80],
-    [0x80, 0x00, 0x00],
-    [0x80, 0x00, 0x80],
-    [0x80, 0x80, 0x00],
-    [0xC0, 0xC0, 0xC0],
-    [0x40, 0x40, 0x40],
-    [0x00, 0x00, 0xff],
-    [0x00, 0xff, 0x00],
-    [0x00, 0xff, 0xff],
-    [0xff, 0x00, 0x00],
-    [0xff, 0x00, 0xff],
-    [0xff, 0xff, 0x00],
-    [0xff, 0xff, 0xff],
-  ];
 
   const fg = current_color & 0x0F;
   const bg = (current_color >> 4) & 0x0F;
