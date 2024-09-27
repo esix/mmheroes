@@ -1,5 +1,6 @@
 import ansi from 'ansi-escape-sequences'
-import { term, PositionR, PositionC, Screen, ScreenColor, _update_screen, current_color, _setPositionC, _setPositionR } from "./crt";
+import { term, PositionR, PositionC, Screen, ScreenColor, _readln, _update_screen, current_color, _setPositionC, _setPositionR } from "./crt";
+
 
 function _crlf() {
   _setPositionR(PositionR + 1);
@@ -39,11 +40,5 @@ export function Writeln(str) {
 }
 
 export function Readln() {
-  debugger;
-  _update_screen();
-  let res = prompt('Enter string:', window.localStorage.getItem('nick') || '');
-  if (res === null) {
-    res = '';
-  }
-  return res;
+  return _readln();
 }

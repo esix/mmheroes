@@ -568,7 +568,7 @@ async function game_end_alive() {
       hero.money = 0;
       Writeln('Да ты еще и GOD! Нет, тебе в таблицу рекордов нельзя.');
     } else {
-      update_top_gamers(score + hero.money);
+      await update_top_gamers(score + hero.money);
     }
   }
   await wait_for_key();
@@ -2110,7 +2110,7 @@ function read_top_gamers() {
 
 
 
-function update_top_gamers(score) {
+async function update_top_gamers(score) {
   let var_108;
   let var_106;
   let my_place = -1;
@@ -2135,7 +2135,7 @@ function update_top_gamers(score) {
   Writeln();
   Write('Как тебя зовут, герой? ');
   TextColor(0x0A);
-  let my_name = Readln();
+  let my_name = await Readln();
 
   if (my_name.length === 0) {
     TextColor(0x0F);

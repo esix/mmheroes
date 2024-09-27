@@ -1,6 +1,8 @@
 import { Terminal } from "@xterm/xterm";
+import { Readline } from "xterm-readline";
 import "@xterm/xterm/css/xterm.css";
 import ansi from 'ansi-escape-sequences'
+
 
 export const term = new Terminal({
   cols: 80,
@@ -10,6 +12,9 @@ export const term = new Terminal({
   cursorStyle: 'underline',
   // disableStdin: true,
 });
+const rl = new Readline();
+term.loadAddon(rl);
+
 term.open(document.getElementById('terminal'));
 term.onKey((e) => {
   onKeyDown(e.domEvent);
@@ -48,7 +53,12 @@ export let current_color;
 const keyBuffer = [];
 const readKeyWaiters = [];
 
+let isReadline = false;
+
 function onKeyDown(event) {
+  if (isReadline) {
+    return;
+  }
   if (event.keyCode === 116 || event.keyCode === 16 || event.keyCode === 17 || event.keyCode === 18 || event.keyCode === 91) {
     return;
   }
@@ -137,4 +147,18 @@ export function Delay(pause) {
   return new Promise(resolve => {
     window.setTimeout(resolve, pause);
   });
+}
+
+
+export async  function _readln() {
+  _update_screen();
+  // let res = prompt('Enter string:', window.localStorage.getItem('nick') || '');
+  // if (res === null) {
+  //   res = '';
+  // }
+  term.focus();
+  isReadline = true;
+  let str = await rl.read('Как тебя зовут, герой? ');
+  isReadline = false;
+  return str;
 }

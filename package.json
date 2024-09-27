@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@xterm/xterm": "^5.5.0",
-    "ansi-escape-sequences": "^6.2.2"
+    "ansi-escape-sequences": "^6.2.2",
+    "xterm-readline": "^1.1.1"
   }
 }
