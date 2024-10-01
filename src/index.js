@@ -1,5 +1,5 @@
 import { Write, Writeln, Readln } from "./system";
-import { ReadKey, ClrScr, GotoXY, TextColor, TextBackground, WhereY, Delay, _set_current_color } from "./crt";
+import {ReadKey, ClrScr, GotoXY, TextColor, TextBackground, WhereY, Delay, _set_current_color, term} from "./crt";
 
 
 let local_user_name = '';
@@ -338,10 +338,6 @@ function jb(a, b) {
 
 function jnb(a, b) {
   return a >= b;
-}
-
-function jbe(a, b) {
-  return a <= b;
 }
 
 function ja(a, b) {
@@ -1658,7 +1654,7 @@ async function sub_15B3A() {
     return;
   }
 
-  if (!jbe(Random(3), 0)) {
+  if (!(Random(3) <= 0)) {
     ClrScr();
     show_header_stats();
     GotoXY(1, 8);
@@ -2737,10 +2733,6 @@ async function scene_exam() {
 
           --var_4;
 
-          if (!jbe(WhereY(), 0x46)) {
-            Writeln();
-          }
-
           if (!(var_4 !== 0)) {
             Writeln('.');
           } else if (!(var_4 !== 1)) {
@@ -2853,7 +2845,7 @@ async function sub_18FB2(arg_0) {
     dialog_case('Пытаться игнорировать', -1);
     dialog_case(classmate_names[arg_0], -2);
 
-    var_4 = WhereY() + 2;
+    var_4 = await WhereY() + 2;
     show_short_today_timesheet(var_4);
     const res = await dialog_run(1, var_4);
 
@@ -3051,7 +3043,7 @@ async function talkToRAI() {
     if (ax === 1) {
       GotoXY(1, 0x0F);
 
-      if (!jbe(Random(hero.subject[current_subject].knowledge), Random(subjects[current_subject].member0xFA))) {
+      if (!(Random(hero.subject[current_subject].knowledge) <= Random(subjects[current_subject].member0xFA))) {
         TextColor(0x0A);
         Writeln('Ты помог RAI.');
         ++hero.brain;
@@ -3735,7 +3727,7 @@ async function sub_1D30D() {
       }
 
       TextColor(7);
-      if (!jbe(Random(3), 0)) {
+      if (!(Random(3) <= 0)) {
         Writeln('И еще по пиву...');
         hero.brain -= Random(2);
         if (!jg(hero.brain, 0)) {
@@ -4175,7 +4167,7 @@ function updatePasha(/*arg_0*/) {
     for (let i = 0; i <= 2; ++i) {
       if (is_professor_here_today(i)) {
         bp_var_2[0] = 1;
-        if (!jbe(Random(0x0A), 5)) {
+        if (!(Random(0x0A) <= 5)) {
           bp_var_2[1] = 1;
           classmates[Pasha].place = timesheet[day_of_week][i].where;
           classmates[Pasha].current_subject = i;
@@ -4204,7 +4196,7 @@ function sub_1ED56(/*arg_0*/) {
   for (let i = 5; i >= 0; --i) {
     if (is_professor_here_today(i)) {
       if (bp_var_2[1] === 0) {
-        if (!jbe(Random(0x0A), 5)) {
+        if (!(Random(0x0A) <= 5)) {
           classmates[Diamond].place = timesheet[day_of_week][i].where;
           classmates[Diamond].current_subject = i;
         }
@@ -4256,7 +4248,7 @@ function sub_1EE2C(/*arg_0*/) {
         if (!(i === 3)) {
           bp_var_2[0] = 1;
 
-          if (!jbe(Random(0x0A), 5)) {
+          if (!(Random(0x0A) <= 5)) {
             bp_var_2[1] = 1;
             classmates[Misha].place = timesheet[day_of_week][i].where;
             classmates[Misha].current_subject = i;
@@ -4285,7 +4277,7 @@ function sub_1EECC(/*arg_0*/) {
     for (let i = 5; i >= 0; --i) {
       if (is_professor_here_today(i)) {
         bp_var_2[0] = 1;
-        if (!jbe(Random(0x0A), 5)) {
+        if (!(Random(0x0A) <= 5)) {
           bp_var_2[1] = 1;
           classmates[Serzg].place = timesheet[day_of_week][i].where;
           classmates[Serzg].current_subject = i;
@@ -4322,7 +4314,7 @@ function sub_1EF9E(/*arg_0*/) {
     for (let var_2 = 0; var_2 <= 2; ++var_2) {
       if (is_professor_here_today(var_2)) {
         bp_var_2[0] = 1;
-        if (!jbe(Random(0x0A), 5)) {
+        if (!(Random(0x0A) <= 5)) {
           bp_var_2[1] = 1;
           classmates[Nil].place = timesheet[day_of_week][var_2].where;
           classmates[Nil].current_subject = var_2;
@@ -4357,7 +4349,7 @@ function sub_1F06D() {
 
   for (let i = 0; i <= 2; ++i) {
     if (is_professor_here_today(i)) {
-      if (!jbe(Random(0x0A), 5)) {
+      if (!(Random(0x0A) <= 5)) {
         classmates[Endryu].place = timesheet[day_of_week][i].where;
         classmates[Endryu].current_subject = i;
       }

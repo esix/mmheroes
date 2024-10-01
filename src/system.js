@@ -1,11 +1,8 @@
 import ansi from 'ansi-escape-sequences'
-import { term, PositionR, PositionC, Screen, ScreenColor, _readln, _update_screen, current_color, _setPositionC, _setPositionR } from "./crt";
+import { term, _readln, current_color} from "./crt";
 
 
 function _crlf() {
-  _setPositionR(PositionR + 1);
-  _setPositionC(0);
-  //
   term.write('\r\n');
 }
 
@@ -17,13 +14,6 @@ const COLORS = '#000000 #0000aa #00aa00 #00aaaa #aa0000 #aa00aa #aa5500 #aaaaaa 
 
 export function Write(str) {
   str = '' + str;
-  for (let i = 0; i < str.length; ++i) {
-    Screen[PositionR][PositionC] = str.charAt(i);
-    ScreenColor[PositionR][PositionC] = current_color;
-    _setPositionC(PositionC + 1);
-  }
-  _update_screen();
-
   const fg = current_color & 0x0F;
   const bg = (current_color >> 4) & 0x0F;
   term.write(ansi.rgb(...COLORS[fg]));

@@ -21,26 +21,7 @@ term.onKey((e) => {
 });
 
 
-// My little and buggy implementation of pascal
-export let Screen = [];
-export let ScreenColor = [];
-
-export let PositionR = 0, PositionC = 0;
-export function _setPositionC(v) { PositionC = v; }
-export function _setPositionR(v) { PositionR = v; }
-
-
-
 function __CrtInit() {
-  for (let i = 0; i < 25; ++i) {
-    Screen.push([]);
-    ScreenColor.push([]);
-    for (let j = 0; j < 80; ++j) {
-      Screen[i].push(' ');
-      ScreenColor[i].push(0x07);
-    }
-  }
-
   term.clear();
 }
 
@@ -83,16 +64,6 @@ export function ReadKey() {
 }
 
 export function ClrScr() {
-  PositionC = 0;
-  PositionR = 0;
-
-  for (let i = 0; i < 25; ++i) {
-    for (let j = 0; j < 80; ++j) {
-      Screen[i][j] = ' ';
-      ScreenColor[i][j] = 0x07;
-    }
-  }
-
   // term.clear();
   term.write(ansi.erase.display(2));
   term.write(ansi.cursor.position(0, 0));
@@ -101,9 +72,6 @@ export function ClrScr() {
 
 
 export function GotoXY(x, y) {
-  PositionR = y - 1;
-  PositionC = x - 1;
-
   term.write(ansi.cursor.position(y, x));
 }
 
@@ -115,26 +83,28 @@ export function TextBackground(color) {
   current_color = current_color & 0x0F | ((color & 0x0f) << 4);
 }
 
-export function WhereY() {
-  return PositionR;
+export async function WhereY() {
+  term.refresh(0, term.rows);
+  await Delay(0);
+  return term.buffer.active.cursorY;
 }
 
 
 
 export function _update_screen() {
-  let html = '';
-  html += '<table id="screen">';
-  for (let i = 0; i < 25; ++i) {
-    html += '<tr>';
-    for (let j = 0; j < 80; ++j) {
-      html += '<td class="fg' + (ScreenColor[i][j] & 0xF) + ' bg' + (ScreenColor[i][j] >> 4) + '">' +
-          Screen[i][j] + '</td>';
-    }
-    html += '</tr>';
-  }
-  html += '</table>';
-
-  document.getElementById('content').innerHTML = html;
+  // let html = '';
+  // html += '<table id="screen">';
+  // for (let i = 0; i < 25; ++i) {
+  //   html += '<tr>';
+  //   for (let j = 0; j < 80; ++j) {
+  //     html += '<td class="fg' + (ScreenColor[i][j] & 0xF) + ' bg' + (ScreenColor[i][j] >> 4) + '">' +
+  //         Screen[i][j] + '</td>';
+  //   }
+  //   html += '</tr>';
+  // }
+  // html += '</table>';
+  //
+  // document.getElementById('content').innerHTML = html;
 }
 
 
