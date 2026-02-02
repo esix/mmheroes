@@ -1,31 +1,73 @@
-import { Terminal } from "@xterm/xterm";
-import { Readline } from "xterm-readline";
-import "@xterm/xterm/css/xterm.css";
-import ansi from 'ansi-escape-sequences'
+import ansi from 'ansi-escape-sequences';
+
+export let term;
 
 
-export const term = new Terminal({
-  cols: 80,
-  rows: 25,
-  scrollback: 0,
-  cursorInactiveStyle: 'none',
-  cursorStyle: 'underline',
-  // disableStdin: true,
-});
-const rl = new Readline();
-term.loadAddon(rl);
+export async function __CrtInit() {
+  debugger;
+  if (typeof window !== 'undefined') {
+    const { Terminal } = await import("@xterm/xterm");
+    const { Readline } = await import("xterm-readline");
+    debugger;
+    await import("@xterm/xterm/css/xterm.css");
+    term = new Terminal({
+      cols: 80,
+      rows: 25,
+      scrollback: 0,
+      cursorInactiveStyle: 'none',
+      cursorStyle: 'underline',
+      // disableStdin: true,
+    });
+    const rl = new Readline();
+    term.loadAddon(rl);
 
-term.open(document.getElementById('terminal'));
-term.onKey((e) => {
-  onKeyDown(e.domEvent);
-});
+    term.open(document.getElementById('terminal'));
+    term.onKey((e) => {
+      onKeyDown(e.domEvent);
+    });
+    document.body.addEventListener('keydown', onKeyDown, false);
 
+  } else {
+    // Node.js версия с использованием readline
+    const readline = await import('readline');
 
-function __CrtInit() {
+    // Настройка raw режима для stdin
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    term = {
+      cols: process.stdout.columns || 80,
+      rows: process.stdout.rows || 25,
+      clear: () => {
+        process.stdout.write('\x1Bc'); // Очистка терминала
+      },
+      write: (data) => {
+        process.stdout.write(data);
+      },
+      refresh: () => {
+        // В Node.js обычно не требуется
+      },
+      onKey: (callback) => {
+        process.stdin.on('data', (key) => {
+          if (key === '\u0003') { // Ctrl+C
+            process.exit();
+          }
+          callback({
+            domEvent: {
+              key: key,
+              keyCode: key.charCodeAt(0)
+            }
+          });
+        });
+      }
+    };
+  }
+
   term.clear();
 }
 
-__CrtInit();
+
 
 export let current_color;
 
@@ -50,7 +92,6 @@ function onKeyDown(event) {
   }
 }
 
-document.body.addEventListener('keydown', onKeyDown, false);
 
 
 export function ReadKey() {

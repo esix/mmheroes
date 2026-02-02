@@ -1,5 +1,5 @@
 import ansi from 'ansi-escape-sequences'
-import { term, _readln, current_color} from "./crt";
+import { term, _readln, current_color} from "./crt.js";
 
 
 function _crlf() {

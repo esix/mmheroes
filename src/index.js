@@ -1,5 +1,16 @@
-import { Write, Writeln, Readln } from "./system";
-import {ReadKey, ClrScr, GotoXY, TextColor, TextBackground, WhereY, Delay, _set_current_color, term} from "./crt";
+import { Write, Writeln, Readln } from "./system.js";
+import {
+  ReadKey,
+  ClrScr,
+  GotoXY,
+  TextColor,
+  TextBackground,
+  WhereY,
+  Delay,
+  _set_current_color,
+  term,
+  __CrtInit
+} from "./crt.js";
 
 
 let local_user_name = '';
@@ -171,13 +182,20 @@ async function _init_vars() {
 }
 
 // [i * 0x11 + 2] // four_letters_places
-let places = [{title: '----'}, {title: 'ПУНК '}, {title: 'ПОМИ '}, {title: 'Компы'}, {title: 'Общага'}, {title: 'Мавзолей'}];
+const places = [
+  {title: '----'},
+  {title: 'ПУНК '},
+  {title: 'ПОМИ '},
+  {title: 'Компы'},
+  {title: 'Общага'},
+  {title: 'Мавзолей'}
+];
 
 
 // 0x74, size 7
-let days = ['22.5', '23.5', '24.5', '25.5', '26.5', '27.5'];
+const days = ['22.5', '23.5', '24.5', '25.5', '26.5', '27.5'];
 // 0x260, size 0x11
-let classmate_names = ['Коля', 'Паша', 'Diamond', 'RAI', 'Миша', 'Серж', 'Саша', 'NiL', 'Кузьменко В.Г.', 'DJuG', 'Эндрю', 'Гриша'];
+const classmate_names = ['Коля', 'Паша', 'Diamond', 'RAI', 'Миша', 'Серж', 'Саша', 'NiL', 'Кузьменко В.Г.', 'DJuG', 'Эндрю', 'Гриша'];
 
 const Kolya = 0, Pasha = 1, Diamond = 2, Rai = 3, Misha = 4, Serzg = 5, Sasha = 6, Nil = 7, Kuzmenko = 8, Djug = 9,
     Endryu = 10, Grisha = 11;
@@ -274,6 +292,7 @@ async function dialog_run(x, y) {
 
 async function Main() {
   try {
+    await __CrtInit();
     await PROGRAM();
   } catch (e) {
     if (e !== 42) {
