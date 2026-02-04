@@ -4,11 +4,9 @@ export let term;
 
 
 export async function __CrtInit() {
-  debugger;
   if (typeof window !== 'undefined') {
     const { Terminal } = await import("@xterm/xterm");
     const { Readline } = await import("xterm-readline");
-    debugger;
     await import("@xterm/xterm/css/xterm.css");
     term = new Terminal({
       cols: 80,
@@ -23,9 +21,9 @@ export async function __CrtInit() {
 
     term.open(document.getElementById('terminal'));
     term.onKey((e) => {
-      onKeyDown(e.domEvent);
+      onKeyDown(e.domEvent.keyCode);
     });
-    document.body.addEventListener('keydown', onKeyDown, false);
+    document.body.addEventListener('keydown', e =>  onKeyDown(e.keyCode), false);
 
   } else {
     // Node.js версия с использованием readline
@@ -46,22 +44,18 @@ export async function __CrtInit() {
         process.stdout.write(data);
       },
       refresh: () => {
-        // В Node.js обычно не требуется
+        // no need
       },
-      onKey: (callback) => {
-        process.stdin.on('data', (key) => {
-          if (key === '\u0003') { // Ctrl+C
-            process.exit();
-          }
-          callback({
-            domEvent: {
-              key: key,
-              keyCode: key.charCodeAt(0)
-            }
-          });
-        });
-      }
     };
+    process.stdin.on('data', (key) => {
+      if (key === '\u0003') { // Ctrl+C
+        process.exit();
+      }
+      for (let i = 0; i < key.length; i++) {
+        const keyCode = key.charCodeAt(i);
+        onKeyDown(keyCode);
+      }
+    });
   }
 
   term.clear();
@@ -78,17 +72,17 @@ const readKeyWaiters = [];
 
 let isReadline = false;
 
-function onKeyDown(event) {
+function onKeyDown(keyCode) {
   if (isReadline) {
     return;
   }
-  if (event.keyCode === 116 || event.keyCode === 16 || event.keyCode === 17 || event.keyCode === 18 || event.keyCode === 91) {
+  if (keyCode === 116 || keyCode === 16 || keyCode === 17 || keyCode === 18 || keyCode === 91) {
     return;
   }
   if (readKeyWaiters.length) {
-    readKeyWaiters.shift()(event.keyCode);
+    readKeyWaiters.shift()(keyCode);
   } else {
-    keyBuffer.push(event.keyCode);
+    keyBuffer.push(keyCode);
   }
 }
 
@@ -156,7 +150,7 @@ export function _set_current_color(cc) {
 
 export function Delay(pause) {
   return new Promise(resolve => {
-    window.setTimeout(resolve, pause);
+    setTimeout(resolve, pause);
   });
 }
 

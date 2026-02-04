@@ -273,13 +273,13 @@ async function dialog_run(x, y) {
     if (key === 0x0D) {
       _set_current_color(7);
       return dialog[current_selection].num;
-    } else if (key === 38) { // up
+    } else if (key === 38 || key === 65) { // up
       if (current_selection === 0) {
         current_selection = dialog_case_count - 1;
       } else {
         --current_selection;
       }
-    } else if (key === 40) { // down
+    } else if (key === 40 || key === 66) { // down
       if (current_selection === dialog_case_count - 1) {
         current_selection = 0;
       } else {
