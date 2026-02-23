@@ -15,6 +15,25 @@ export async function __CrtInit() {
       cursorInactiveStyle: 'none',
       cursorStyle: 'underline',
       // disableStdin: true,
+      theme: {
+        background:   '#000000',
+        black:        '#000000',
+        red:          '#aa0000',
+        green:        '#00aa00',
+        yellow:       '#aa5500',
+        blue:         '#0000aa',
+        magenta:      '#aa00aa',
+        cyan:         '#00aaaa',
+        white:        '#aaaaaa',
+        brightBlack:  '#555555',
+        brightRed:    '#ff5555',
+        brightGreen:  '#55ff55',
+        brightYellow: '#ffff55',
+        brightBlue:   '#5555ff',
+        brightMagenta:'#ff55ff',
+        brightCyan:   '#55ffff',
+        brightWhite:  '#ffffff',
+      },
     });
     const rl = new Readline();
     term.loadAddon(rl);
@@ -49,6 +68,7 @@ export async function __CrtInit() {
     };
     process.stdin.on('data', (key) => {
       if (key === '\u0003') { // Ctrl+C
+        process.stdout.write('\x1b[0m'); // reset colors before exit
         process.exit();
       }
       for (let i = 0; i < key.length; i++) {

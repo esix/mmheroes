@@ -300,6 +300,10 @@ async function Main() {
       alert(e + '\r\n' + e.stack);
     }
   }
+  if (typeof window === 'undefined') {
+    process.stdout.write('\x1b[0m');
+    process.exit(0);
+  }
 }
 
 

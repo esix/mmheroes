@@ -1,4 +1,3 @@
-import ansi from 'ansi-escape-sequences'
 import { term, _readln, current_color} from "./crt.js";
 
 
@@ -7,17 +6,17 @@ function _crlf() {
 }
 
 
-const COLORS = '#000000 #0000aa #00aa00 #00aaaa #aa0000 #aa00aa #aa5500 #aaaaaa #555555 #5555ff #55ff55 #55ffff #ff5555 #ff55ff #ffff55 #ffffff'
-    .split(' ')
-    .map(s => [parseInt(s.slice(1, 3), 16), parseInt(s.slice(1, 5), 16), parseInt(s.slice(5, 7), 16)]);
+// CGA color index → ANSI 16-color codes
+// Bright variants (8-15) use the high-intensity codes (90-97 fg, 100-107 bg)
+const FG_CODE = [30, 34, 32, 36, 31, 35, 33, 37, 90, 94, 92, 96, 91, 95, 93, 97];
+const BG_CODE = [40, 44, 42, 46, 41, 45, 43, 47, 100, 104, 102, 106, 101, 105, 103, 107];
 
 
 export function Write(str) {
   str = '' + str;
   const fg = current_color & 0x0F;
   const bg = (current_color >> 4) & 0x0F;
-  term.write(ansi.rgb(...COLORS[fg]));
-  term.write(ansi.bgRgb(...COLORS[bg]));
+  term.write(`\x1b[${FG_CODE[fg]};${BG_CODE[bg]}m`);
   term.write(str);
 
   term.refresh(0, term.rows);
